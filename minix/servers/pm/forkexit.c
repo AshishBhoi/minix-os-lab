@@ -130,6 +130,10 @@ int do_fork()
   /* Do not reply until VFS is ready to process the fork
   * request
   */
+
+ /* Output "Minix: PID <pid> created" On any process created */
+  printf("Minix : PID %d created", new_pid);
+  
   return SUSPEND;
 }
 
@@ -241,6 +245,8 @@ int do_exit()
       sys_kill(mp->mp_endpoint, SIGKILL);
   }
   else {
+      /* Output "Minix: PID <pid> exited" On any process exited */
+      printf("Minix: PID %d exited", mp->mp_pid);
       exit_proc(mp, m_in.m_lc_pm_exit.status, FALSE /*dump_core*/);
   }
   return(SUSPEND);		/* can't communicate from beyond the grave */
@@ -727,4 +733,3 @@ register struct mproc *rmp;	/* tells which process is exiting */
   rmp->mp_child_stime = 0;
   procs_in_use--;
 }
-
