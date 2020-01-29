@@ -330,7 +330,7 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 	{
 		printf("Minix: PID %d swapped in\n", rmp.PID);
 	}
-	
+	printf("Test Print\n");
 
 	return err;
 }
