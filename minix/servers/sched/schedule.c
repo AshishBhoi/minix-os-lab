@@ -156,6 +156,7 @@ int do_start_scheduling(message *m_ptr)
 	/* Resolve endpoint to proc slot. */
 	if ((rv = sched_isemtyendpt(m_ptr->m_lsys_sched_scheduling_start.endpoint,
 			&proc_nr_n)) != OK) {
+				printf("Hello CHECK 1 -------------------------------------------------------------------------------------\n");
 		return rv;
 	}
 	rmp = &schedproc[proc_nr_n];
@@ -165,6 +166,7 @@ int do_start_scheduling(message *m_ptr)
 	rmp->parent       = m_ptr->m_lsys_sched_scheduling_start.parent;
 	rmp->max_priority = m_ptr->m_lsys_sched_scheduling_start.maxprio;
 	if (rmp->max_priority >= NR_SCHED_QUEUES) {
+		printf("Hello CHECK 2 -------------------------------------------------------------------------------------\n");
 		return EINVAL;
 	}
 
@@ -205,6 +207,7 @@ int do_start_scheduling(message *m_ptr)
 		 * value is local and we assert that the parent endpoint is valid */
 		if ((rv = sched_isokendpt(m_ptr->m_lsys_sched_scheduling_start.parent,
 				&parent_nr_n)) != OK)
+				printf("Hello CHECK 3 -------------------------------------------------------------------------------------\n");
 			return rv;
 
 		rmp->priority = schedproc[parent_nr_n].priority;
@@ -221,6 +224,7 @@ int do_start_scheduling(message *m_ptr)
 	if ((rv = sys_schedctl(0, rmp->endpoint, 0, 0, 0)) != OK) {
 		printf("Sched: Error taking over scheduling for %d, kernel said %d\n",
 			rmp->endpoint, rv);
+			printf("Hello CHECK 4 -------------------------------------------------------------------------------------\n");
 		return rv;
 	}
 	rmp->flags = IN_USE;
@@ -236,6 +240,7 @@ int do_start_scheduling(message *m_ptr)
 	if (rv != OK) {
 		printf("Sched: Error while scheduling process, kernel replied %d\n",
 			rv);
+			printf("Hello CHECK 5 -------------------------------------------------------------------------------------\n");
 		return rv;
 	}
 
@@ -248,7 +253,7 @@ int do_start_scheduling(message *m_ptr)
 
 	m_ptr->m_sched_lsys_scheduling_start.scheduler = SCHED_PROC_NR;
 
-	//printf("Minix: PID %d swapped in\n", rmp.PID);
+	printf("Hello CHECK -------------------------------------------------------------------------------------\n");
 
 	return OK;
 }
@@ -326,11 +331,6 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 		printf("PM: An error occurred when trying to schedule %d: %d\n",
 		rmp->endpoint, err);
 	}
-	else
-	{
-		printf("Minix: PID %d swapped in\n", rmp.PID);
-	}
-	printf("Test Print\n");
 
 	return err;
 }
