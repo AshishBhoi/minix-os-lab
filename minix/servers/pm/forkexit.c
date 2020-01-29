@@ -132,7 +132,7 @@ int do_fork()
   */
 
  /* Output "Minix: PID <pid> created" On any process created */
-  printf("Minix : PID %d created", new_pid);
+  printf("Minix : PID %d created\n", new_pid);
   
   return SUSPEND;
 }
@@ -246,7 +246,7 @@ int do_exit()
   }
   else {
       /* Output "Minix: PID <pid> exited" On any process exited */
-      printf("Minix: PID %d exited", mp->mp_pid);
+      printf("Minix: PID %d exited\n", mp->mp_pid);
       exit_proc(mp, m_in.m_lc_pm_exit.status, FALSE /*dump_core*/);
   }
   return(SUSPEND);		/* can't communicate from beyond the grave */
