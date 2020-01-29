@@ -248,7 +248,7 @@ int do_start_scheduling(message *m_ptr)
 
 	m_ptr->m_sched_lsys_scheduling_start.scheduler = SCHED_PROC_NR;
 
-	printf("Minix: PID %d swapped in\n", rmp.PID);
+	//printf("Minix: PID %d swapped in\n", rmp.PID);
 
 	return OK;
 }
@@ -326,6 +326,11 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 		printf("PM: An error occurred when trying to schedule %d: %d\n",
 		rmp->endpoint, err);
 	}
+	else
+	{
+		printf("Minix: PID %d swapped in\n", rmp.PID);
+	}
+	
 
 	return err;
 }
