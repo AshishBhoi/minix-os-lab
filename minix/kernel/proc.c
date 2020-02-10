@@ -1544,8 +1544,8 @@ void enqueue(
 
   rdy_head = get_cpu_var(rp->p_cpu, run_q_head);
   rdy_tail = get_cpu_var(rp->p_cpu, run_q_tail);
-
   /* Now add the process to the queue. */
+	if(q<7){
   if (!rdy_head[q]) {		/* add to empty queue */
       rdy_head[q] = rdy_tail[q] = rp; 		/* create a new queue */
       rp->p_nextready = NULL;		/* mark new end */
@@ -1554,7 +1554,29 @@ void enqueue(
       rdy_tail[q]->p_nextready = rp;		/* chain tail of queue */	
       rdy_tail[q] = rp;				/* set new queue tail */
       rp->p_nextready = NULL;		/* mark new end */
-  }
+  }}
+	else if(q==7 && rp->p_accounting.enter_queue ==0) {
+  if (!rdy_head[q]) {		/* add to empty queue */
+      rdy_head[q] = rdy_tail[q] = rp; 		/* create a new queue */
+      rp->p_nextready = NULL;		/* mark new end */
+  } 
+  else {					/* add to tail of queue */
+      rdy_tail[q]->p_nextready = rp;		/* chain tail of queue */	
+      rdy_tail[q] = rp;				/* set new queue tail */
+      rp->p_nextready = NULL;		/* mark new end */
+  }}
+	else if(q==7 && rp->p_accounting.enter_queue >0 ){
+		if(rp->p_accounting.time_in_queue==0){
+			//	printf("just entered %d with enter queue time %llu\n",rp->p_endpoint,rp->p_accounting.enter_queue);
+		}
+		if (!rdy_head[q]) {		/* add to empty queue */
+		rdy_head[q] = rdy_tail[q] = rp; 	/* create a new queue */
+		rp->p_nextready = NULL;			/* mark new end */
+  	} else {					/* add to head of queue */
+			rp->p_nextready = rdy_head[q];		/* chain head of queue */
+			rdy_head[q] = rp;			/* set new queue head */
+  	}
+	}
 
   if (cpuid == rp->p_cpu) {
 	  /*
@@ -1796,7 +1818,7 @@ static void notify_scheduler(struct proc *p)
 	int err;
 
 	assert(!proc_kernel_scheduler(p));
-
+//	printf("dequeuing the process %d\n",p->p_endpoint);
 	/* dequeue the process */
 	RTS_SET(p, RTS_NO_QUANTUM);
 	/*

@@ -45,6 +45,7 @@ static void balance_queues(minix_timer_t *tp);
 
 /* processes created by RS are sysytem processes */
 #define is_system_proc(p)	((p)->parent == RS_PROC_NR)
+//#define is_user_proc(p)	((p)->parent == PM_PROC_NR)
 
 static unsigned cpu_proc[CONFIG_MAX_CPUS];
 
@@ -81,6 +82,9 @@ static void pick_cpu(struct schedproc * proc)
 #else
 	proc->cpu = 0;
 #endif
+	int proc1;
+	sched_isokendpt(proc->endpoint, &proc1);
+	printf("MINIX: PID %d swapped in\n",proc1);
 }
 
 /*===========================================================================*
@@ -99,8 +103,9 @@ int do_noquantum(message *m_ptr)
 	}
 
 	rmp = &schedproc[proc_nr_n];
+	//printf("in do_no_quantum: priority: %d max prority: %d pid:%d\n",rmp->priority,rmp->max_priority,proc_nr_n);
 	if (rmp->priority < MIN_USER_Q) {
-		rmp->priority += 1; /* lower priority */
+		//rmp->priority += 1; /* lower priority */
 	}
 
 	if ((rv = schedule_process_local(rmp)) != OK) {
@@ -160,6 +165,8 @@ int do_start_scheduling(message *m_ptr)
 	}
 	rmp = &schedproc[proc_nr_n];
 
+	//printf("schedule proc_nr_n:%d\n",proc_nr_n);
+
 	/* Populate process slot */
 	rmp->endpoint     = m_ptr->m_lsys_sched_scheduling_start.endpoint;
 	rmp->parent       = m_ptr->m_lsys_sched_scheduling_start.parent;
@@ -209,6 +216,7 @@ int do_start_scheduling(message *m_ptr)
 
 		rmp->priority = schedproc[parent_nr_n].priority;
 		rmp->time_slice = schedproc[parent_nr_n].time_slice;
+		//printf("MINIX:PID %d swapped in\n",rmp->mp_pid);
 		break;
 		
 	default: 
@@ -224,7 +232,7 @@ int do_start_scheduling(message *m_ptr)
 		return rv;
 	}
 	rmp->flags = IN_USE;
-
+	//printf("in do_start_scheduling: priority: %d max prority: %d pid:%d\n",rmp->priority,rmp->max_priority,proc_nr_n);
 	/* Schedule the process, giving it some quantum */
 	pick_cpu(rmp);
 	while ((rv = schedule_process(rmp, SCHEDULE_CHANGE_ALL)) == EBADCPU) {
@@ -303,7 +311,6 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 	int new_prio, new_quantum, new_cpu;
 
 	pick_cpu(rmp);
-
 	if (flags & SCHEDULE_CHANGE_PRIO)
 		new_prio = rmp->priority;
 	else
@@ -318,7 +325,7 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 		new_cpu = rmp->cpu;
 	else
 		new_cpu = -1;
-
+	//printf("in schedule_process(): priority: %d max prority: %d endpoint:%d\n",rmp->priority,rmp->max_priority,rmp->endpoint);
 	if ((err = sys_schedule(rmp->endpoint, new_prio,
 		new_quantum, new_cpu)) != OK) {
 		printf("PM: An error occurred when trying to schedule %d: %d\n",
@@ -358,6 +365,7 @@ static void balance_queues(minix_timer_t *tp)
 		if (rmp->flags & IN_USE) {
 			if (rmp->priority > rmp->max_priority) {
 				rmp->priority -= 1; /* increase priority */
+				//printf("MINIX:PID %d swapped in.",rmp->mp_pid);
 				schedule_process_local(rmp);
 			}
 		}
